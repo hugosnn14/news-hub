@@ -24,11 +24,10 @@ class AppRoutes {
 
       case articleDetails:
       case '/ArticleDetails':
-        final article = settings.arguments as ArticleEntity;
         return _materialRoute(
           BlocProvider<ArticleDetailsBloc>(
-            create: (_) =>
-                sl<ArticleDetailsBloc>()..add(LoadArticleDetails(article.id!)),
+            create: (_) => sl<ArticleDetailsBloc>()
+              ..add(LoadArticleDetails(_extractArticleId(settings.arguments))),
             child: const ArticleDetailsView(),
           ),
           settings,
@@ -53,6 +52,20 @@ class AppRoutes {
     return MaterialPageRoute(
       builder: (_) => view,
       settings: settings,
+    );
+  }
+
+  static int _extractArticleId(Object? arguments) {
+    if (arguments is int) {
+      return arguments;
+    }
+
+    if (arguments is ArticleEntity && arguments.id != null) {
+      return arguments.id!;
+    }
+
+    throw ArgumentError(
+      'Article details route requires an articleId or an ArticleEntity with a non-null id.',
     );
   }
 }

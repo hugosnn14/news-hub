@@ -97,10 +97,17 @@ class DailyNews extends StatelessWidget {
   }
 
   void _onArticlePressed(BuildContext context, ArticleEntity article) {
+    final articleId = article.id;
+
+    if (articleId == null) {
+      _showMissingArticleIdMessage(context);
+      return;
+    }
+
     Navigator.pushNamed(
       context,
       AppRoutes.articleDetails,
-      arguments: article,
+      arguments: articleId,
     );
   }
 
@@ -108,6 +115,14 @@ class DailyNews extends StatelessWidget {
     Navigator.pushNamed(
       context,
       AppRoutes.createArticle,
+    );
+  }
+
+  void _showMissingArticleIdMessage(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('The selected article is missing an id.'),
+      ),
     );
   }
 }
