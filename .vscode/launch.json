@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter (Current Android Device)",
+      "type": "dart",
+      "request": "launch",
+      "debuggerType": "flutter",
+      "cwd": "${workspaceFolder}/frontend",
+      "program": "lib/main.dart"
+    }
+  ]
+}
