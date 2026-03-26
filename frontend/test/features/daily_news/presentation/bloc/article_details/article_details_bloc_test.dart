@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:news_app_clean_architecture/features/daily_news/data/repository/in_memory_article_repository.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_article_by_id.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article_details/article_details_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article_details/article_details_event.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article_details/article_details_state.dart';
+
+import '../../../../../helpers/in_memory_article_repository.dart';
 import '../../../../../helpers/fake_article_repository.dart';
 
 void main() {

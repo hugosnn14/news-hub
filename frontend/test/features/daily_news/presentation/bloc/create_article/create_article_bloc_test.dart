@@ -83,7 +83,7 @@ void main() {
           authorName: 'Hugo',
           title: 'Missing thumbnail',
           description: 'The editor should block publishing first.',
-          content: 'A thumbnail is now required before the mock publish step.',
+          content: 'A thumbnail is now required before publishing starts.',
         ),
       );
 
@@ -130,6 +130,44 @@ void main() {
       expect(
         emittedStates[3].errorMessage,
         'No se pudo crear el articulo.',
+      );
+
+      await bloc.close();
+    });
+
+    test('surfaces a StateError message when publishing fails with context',
+        () async {
+      final repository = FakeArticleRepository(
+        pickedThumbnail: pickedThumbnail,
+        createArticleError: StateError(
+          'Firebase Auth no permite el acceso anonimo en este proyecto.',
+        ),
+      );
+      final bloc = CreateArticleBloc(
+        CreateArticleUseCase(repository),
+        SelectArticleThumbnailUseCase(repository),
+      );
+
+      final emittedStatesFuture = bloc.stream.take(4).toList();
+
+      bloc.add(const SelectArticleThumbnailRequested());
+
+      bloc.add(
+        const SubmitCreateArticle(
+          authorName: 'Hugo',
+          title: 'Auth blocked',
+          description: 'Publishing should explain why it failed.',
+          content: 'The user should get the contextual error message.',
+        ),
+      );
+
+      final emittedStates = await emittedStatesFuture;
+
+      expect(emittedStates[2].status, CreateArticleStatus.submitting);
+      expect(emittedStates[3].status, CreateArticleStatus.failure);
+      expect(
+        emittedStates[3].errorMessage,
+        'Firebase Auth no permite el acceso anonimo en este proyecto.',
       );
 
       await bloc.close();

@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:news_app_clean_architecture/features/daily_news/data/repository/in_memory_article_repository.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_articles.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_saved_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/remove_article.dart';
@@ -7,6 +6,8 @@ import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/saved_articles/saved_articles_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/saved_articles/saved_articles_event.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/saved_articles/saved_articles_state.dart';
+
+import '../../../../../helpers/in_memory_article_repository.dart';
 import '../../../../../helpers/fake_article_repository.dart';
 
 void main() {

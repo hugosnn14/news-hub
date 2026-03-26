@@ -51,9 +51,8 @@ Future<void> initializeDependencies() async {
   sl.registerSingleton<SaveArticleUseCase>(SaveArticleUseCase(sl()));
   sl.registerSingleton<RemoveArticleUseCase>(RemoveArticleUseCase(sl()));
 
-  // Active presentation wiring only registers the phase 2 Bloc flow.
-  // Legacy blocs remain in the tree for reference, but are intentionally
-  // disconnected from dependency injection.
+  // Production DI only wires the Firebase-backed article flow.
+  // Test fixtures and legacy implementations stay outside this container.
   sl.registerFactory<ArticlesBloc>(() => ArticlesBloc(sl()));
   sl.registerFactory<CreateArticleBloc>(() => CreateArticleBloc(sl(), sl()));
   sl.registerFactory<ArticleDetailsBloc>(() => ArticleDetailsBloc(sl()));

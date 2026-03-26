@@ -195,7 +195,7 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'This editor keeps the mocked business flow intact while simulating a polished publishing experience.',
+                    'Write a real article, attach a cover image, and publish it to the live editorial feed.',
                     style: textTheme.bodyLarge?.copyWith(
                       color: AppPalette.onSurfaceMuted,
                     ),
@@ -289,8 +289,6 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            _buildToolbarCard(context),
           ],
         ),
       ),
@@ -351,16 +349,16 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
           const SizedBox(height: 16),
           Text(
             selectedThumbnail == null
-                ? 'Header image placeholder'
-                : 'Thumbnail ready',
+                ? 'Cover image'
+                : 'Cover image ready',
             style: textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
           Text(
             selectedThumbnail == null
-                ? 'Pick a thumbnail now so the editor flow matches the Firebase-ready contract. Upload remains deferred to the next data-layer commit.'
+                ? 'Select the image that will be uploaded to Firebase Storage when the article is published.'
                 : selectedThumbnail.fileName ??
-                    'A local thumbnail has been selected for this draft.',
+                    'The selected image will be uploaded with this article.',
             textAlign: TextAlign.center,
             style: textTheme.bodyMedium,
           ),
@@ -486,106 +484,6 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
       child: Text(
         '$current / $max',
         style: Theme.of(context).textTheme.labelMedium,
-      ),
-    );
-  }
-
-  Widget _buildToolbarCard(BuildContext context) {
-    const toolbarActions = [
-      _FormattingAction(
-        icon: Icons.format_bold_rounded,
-        label: 'Bold',
-      ),
-      _FormattingAction(
-        icon: Icons.format_italic_rounded,
-        label: 'Italic',
-      ),
-      _FormattingAction(
-        icon: Icons.link_rounded,
-        label: 'Link',
-      ),
-      _FormattingAction(
-        icon: Icons.format_quote_rounded,
-        label: 'Quote',
-      ),
-    ];
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppPalette.surface,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
-          BoxShadow(
-            color: AppPalette.shadow,
-            blurRadius: 24,
-            offset: Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Formatting',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Rich text actions are mocked in this phase. Tap a control to see the planned behavior.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppPalette.onSurfaceMuted,
-                      ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            alignment: WrapAlignment.end,
-            children: toolbarActions
-                .map(
-                  (action) => Tooltip(
-                    message: '${action.label} formatting (mock)',
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(14),
-                      onTap: () =>
-                          _showFormattingMessage(context, action.label),
-                      child: Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: AppPalette.surfaceContainer,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Icon(
-                          action.icon,
-                          size: 20,
-                          color: AppPalette.onSurfaceMuted,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showFormattingMessage(BuildContext context, String actionLabel) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$actionLabel formatting is a UI stub in this mocked phase.',
-        ),
       ),
     );
   }
@@ -741,7 +639,7 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
               ),
               const SizedBox(height: 10),
               Text(
-                'The new article is already available in the mocked feed and ready to be reviewed.',
+                'The new article is already available in the feed and ready to be reviewed.',
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium,
               ),
@@ -938,14 +836,4 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
       arguments: articleId,
     );
   }
-}
-
-class _FormattingAction {
-  final IconData icon;
-  final String label;
-
-  const _FormattingAction({
-    required this.icon,
-    required this.label,
-  });
 }

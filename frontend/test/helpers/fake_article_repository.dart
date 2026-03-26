@@ -12,6 +12,7 @@ class FakeArticleRepository implements ArticleRepository {
     this.shouldThrowOnPickArticleThumbnail = false,
     this.shouldThrowOnGetArticleById = false,
     this.shouldThrowOnCreateArticle = false,
+    this.createArticleError,
     this.shouldThrowOnGetSavedArticles = false,
     this.shouldThrowOnSaveArticle = false,
     this.shouldThrowOnRemoveArticle = false,
@@ -25,6 +26,7 @@ class FakeArticleRepository implements ArticleRepository {
   final bool shouldThrowOnPickArticleThumbnail;
   final bool shouldThrowOnGetArticleById;
   final bool shouldThrowOnCreateArticle;
+  final Object? createArticleError;
   final bool shouldThrowOnGetSavedArticles;
   final bool shouldThrowOnSaveArticle;
   final bool shouldThrowOnRemoveArticle;
@@ -67,6 +69,10 @@ class FakeArticleRepository implements ArticleRepository {
     ArticleEntity article, {
     required ArticleThumbnailEntity thumbnail,
   }) async {
+    if (createArticleError != null) {
+      throw createArticleError!;
+    }
+
     if (shouldThrowOnCreateArticle) {
       throw Exception('createArticle failed');
     }

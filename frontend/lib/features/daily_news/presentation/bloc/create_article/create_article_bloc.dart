@@ -99,9 +99,6 @@ class CreateArticleBloc extends Bloc<CreateArticleEvent, CreateArticleState> {
     );
 
     try {
-      // Keep the publishing transition visible in the mocked flow.
-      await Future<void>.delayed(const Duration(milliseconds: 600));
-
       final createdArticle = await _createArticleUseCase(
         params: CreateArticleParams(
           authorName: event.authorName,
