@@ -129,8 +129,10 @@ class FakeArticleRepository implements ArticleRepository {
       description: article.description,
       url: article.url,
       urlToImage: currentArticle.urlToImage,
+      thumbnailPath: currentArticle.thumbnailPath,
       publishedAt: currentArticle.publishedAt,
       content: article.content,
+      status: currentArticle.status,
     );
 
     _articles[index] = updatedArticle;

@@ -62,16 +62,30 @@ class SubmitCreateArticle extends CreateArticleEvent {
   final String title;
   final String description;
   final String content;
+  final String? articleId;
+  final String? sourceUrl;
+  final bool isEditing;
 
   const SubmitCreateArticle({
     required this.authorName,
     required this.title,
     required this.description,
     required this.content,
+    this.articleId,
+    this.sourceUrl,
+    this.isEditing = false,
   });
 
   @override
-  List<Object?> get props => [authorName, title, description, content];
+  List<Object?> get props => [
+        authorName,
+        title,
+        description,
+        content,
+        articleId,
+        sourceUrl,
+        isEditing,
+      ];
 }
 
 class ResetCreateArticle extends CreateArticleEvent {

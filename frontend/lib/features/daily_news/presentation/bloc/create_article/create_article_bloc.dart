@@ -6,6 +6,7 @@ import '../../../domain/usecases/create_article.dart';
 import '../../../domain/usecases/get_article_draft.dart';
 import '../../../domain/usecases/save_article_draft.dart';
 import '../../../domain/usecases/select_article_thumbnail.dart';
+import '../../../domain/usecases/update_article.dart';
 import 'create_article_event.dart';
 import 'create_article_state.dart';
 
@@ -15,6 +16,7 @@ class CreateArticleBloc extends Bloc<CreateArticleEvent, CreateArticleState> {
   final GetArticleDraftUseCase _getArticleDraftUseCase;
   final SaveArticleDraftUseCase _saveArticleDraftUseCase;
   final SelectArticleThumbnailUseCase _selectArticleThumbnailUseCase;
+  final UpdateArticleUseCase _updateArticleUseCase;
 
   CreateArticleBloc(
     this._clearArticleDraftUseCase,
@@ -22,6 +24,7 @@ class CreateArticleBloc extends Bloc<CreateArticleEvent, CreateArticleState> {
     this._getArticleDraftUseCase,
     this._saveArticleDraftUseCase,
     this._selectArticleThumbnailUseCase,
+    this._updateArticleUseCase,
   ) : super(const CreateArticleState()) {
     on<LoadArticleDraftRequested>(_onLoadArticleDraftRequested);
     on<PersistArticleDraftRequested>(_onPersistArticleDraftRequested);
@@ -156,7 +159,7 @@ class CreateArticleBloc extends Bloc<CreateArticleEvent, CreateArticleState> {
     SubmitCreateArticle event,
     Emitter<CreateArticleState> emit,
   ) async {
-    if (state.selectedThumbnail == null) {
+    if (!event.isEditing && state.selectedThumbnail == null) {
       emit(
         state.copyWith(
           status: CreateArticleStatus.failure,
@@ -174,15 +177,27 @@ class CreateArticleBloc extends Bloc<CreateArticleEvent, CreateArticleState> {
     );
 
     try {
-      final createdArticle = await _createArticleUseCase(
-        params: CreateArticleParams(
-          authorName: event.authorName,
-          title: event.title,
-          description: event.description,
-          content: event.content,
-          thumbnail: state.selectedThumbnail!,
-        ),
-      );
+      final createdArticle = event.isEditing
+          ? await _updateArticleUseCase(
+              params: UpdateArticleParams(
+                articleId: event.articleId!,
+                authorName: event.authorName,
+                title: event.title,
+                description: event.description,
+                content: event.content,
+                sourceUrl: event.sourceUrl,
+                thumbnail: state.selectedThumbnail,
+              ),
+            )
+          : await _createArticleUseCase(
+              params: CreateArticleParams(
+                authorName: event.authorName,
+                title: event.title,
+                description: event.description,
+                content: event.content,
+                thumbnail: state.selectedThumbnail!,
+              ),
+            );
       await _clearArticleDraftUseCase(params: state.draftKey);
 
       emit(
@@ -201,7 +216,9 @@ class CreateArticleBloc extends Bloc<CreateArticleEvent, CreateArticleState> {
           status: CreateArticleStatus.failure,
           errorMessage: error is StateError
               ? error.message.toString()
-              : 'No se pudo crear el articulo.',
+              : event.isEditing
+                  ? 'No se pudo actualizar el articulo.'
+                  : 'No se pudo crear el articulo.',
         ),
       );
     }

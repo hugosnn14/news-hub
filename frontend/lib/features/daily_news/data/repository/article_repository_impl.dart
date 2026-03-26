@@ -115,8 +115,10 @@ class ArticleRepositoryImpl implements ArticleRepository {
       description: article.description,
       url: article.url,
       urlToImage: fallbackThumbnailUrl,
+      thumbnailPath: thumbnailPath,
       publishedAt: DateTime.now().toIso8601String().split('T').first,
       content: article.content,
+      status: 'published',
     );
   }
 
@@ -164,10 +166,10 @@ class ArticleRepositoryImpl implements ArticleRepository {
       return updatedArticle;
     }
 
-    final fallbackThumbnailUrl = nextThumbnailPath == null ||
-            nextThumbnailPath.isEmpty
-        ? kDefaultImage
-        : await _storageRemoteDataSource.getDownloadUrl(nextThumbnailPath);
+    final fallbackThumbnailUrl =
+        nextThumbnailPath == null || nextThumbnailPath.isEmpty
+            ? kDefaultImage
+            : await _storageRemoteDataSource.getDownloadUrl(nextThumbnailPath);
 
     return ArticleEntity(
       id: articleId,
@@ -176,10 +178,12 @@ class ArticleRepositoryImpl implements ArticleRepository {
       description: article.description,
       url: article.url,
       urlToImage: fallbackThumbnailUrl,
+      thumbnailPath: nextThumbnailPath,
       publishedAt: _formatFallbackPublishedAt(
         currentArticleDocument['publishedAt'],
       ),
       content: article.content,
+      status: currentArticleDocument['status'] as String? ?? 'published',
     );
   }
 

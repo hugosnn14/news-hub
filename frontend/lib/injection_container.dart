@@ -91,7 +91,7 @@ Future<void> initializeDependencies() async {
   // Test fixtures and legacy implementations stay outside this container.
   sl.registerFactory<ArticlesBloc>(() => ArticlesBloc(sl()));
   sl.registerFactory<CreateArticleBloc>(
-    () => CreateArticleBloc(sl(), sl(), sl(), sl(), sl()),
+    () => CreateArticleBloc(sl(), sl(), sl(), sl(), sl(), sl()),
   );
   sl.registerFactory<ArticleDetailsBloc>(() => ArticleDetailsBloc(sl()));
   sl.registerFactory<SavedArticlesBloc>(

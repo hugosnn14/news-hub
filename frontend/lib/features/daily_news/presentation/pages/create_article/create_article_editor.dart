@@ -15,17 +15,21 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 import '../../../domain/entities/article.dart';
 import '../../../domain/entities/article_thumbnail.dart';
 
+enum ArticleEditorMode { create, edit }
+
 class CreateArticleEditorPage extends StatefulWidget {
   const CreateArticleEditorPage({
     super.key,
     this.draftKey = CreateArticleState.defaultDraftKey,
     this.initialArticle,
     this.initialThumbnailPath,
+    this.mode = ArticleEditorMode.create,
   });
 
   final String draftKey;
   final ArticleEntity? initialArticle;
   final String? initialThumbnailPath;
+  final ArticleEditorMode mode;
 
   @override
   State<CreateArticleEditorPage> createState() =>
@@ -44,6 +48,8 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
   Timer? _draftSaveTimer;
   bool _hasAppliedLoadedDraft = false;
   bool _showValidation = false;
+
+  bool get _isEditing => widget.mode == ArticleEditorMode.edit;
 
   @override
   void initState() {
@@ -133,13 +139,23 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isPublished ? 'Article published' : 'Create article',
+            isPublished
+                ? _isEditing
+                    ? 'Article updated'
+                    : 'Article published'
+                : _isEditing
+                    ? 'Edit article'
+                    : 'Create article',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           Text(
             isPublished
-                ? 'Preview the published result.'
-                : 'Compose a new story for the editorial feed.',
+                ? _isEditing
+                    ? 'Preview the updated result.'
+                    : 'Preview the published result.'
+                : _isEditing
+                    ? 'Refine the current story and push changes live.'
+                    : 'Compose a new story for the editorial feed.',
             style: Theme.of(context).textTheme.labelMedium,
           ),
         ],
@@ -158,7 +174,15 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
                   vertical: 12,
                 ),
               ),
-              child: Text(isPublishing ? 'Publishing...' : 'Publish'),
+              child: Text(
+                isPublishing
+                    ? _isEditing
+                        ? 'Saving...'
+                        : 'Publishing...'
+                    : _isEditing
+                        ? 'Save changes'
+                        : 'Publish',
+              ),
             ),
           ),
       ],
@@ -226,7 +250,8 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      'Editorial draft'.toUpperCase(),
+                      (_isEditing ? 'Editorial revision' : 'Editorial draft')
+                          .toUpperCase(),
                       style: textTheme.labelMedium?.copyWith(
                         color: AppPalette.onSecondaryContainer,
                         letterSpacing: 0.8,
@@ -235,12 +260,16 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    'Build a publication-ready story',
+                    _isEditing
+                        ? 'Update the live article'
+                        : 'Build a publication-ready story',
                     style: textTheme.displaySmall,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Write a real article, attach a cover image, and publish it to the live editorial feed.',
+                    _isEditing
+                        ? 'The editor starts from the remote article and applies any saved local draft on top of it.'
+                        : 'Write a real article, attach a cover image, and publish it to the live editorial feed.',
                     style: textTheme.bodyLarge?.copyWith(
                       color: AppPalette.onSurfaceMuted,
                     ),
@@ -356,7 +385,10 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
     final selectedThumbnail = state.selectedThumbnail;
     final isBusy = state.isPickingThumbnail ||
         state.status == CreateArticleStatus.submitting;
-    final showValidationMessage = _showValidation && selectedThumbnail == null;
+    final showValidationMessage = !_isEditing &&
+        _showValidation &&
+        selectedThumbnail == null &&
+        !_hasRemoteThumbnail;
 
     return Container(
       width: double.infinity,
@@ -389,27 +421,23 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
               ),
             ),
             clipBehavior: Clip.antiAlias,
-            child: selectedThumbnail != null
-                ? _buildThumbnailPreviewImage(selectedThumbnail.path)
-                : const Center(
-                    child: Icon(
-                      Icons.add_photo_alternate_outlined,
-                      size: 52,
-                      color: AppPalette.primary,
-                    ),
-                  ),
+            child: _buildThumbnailPreview(state),
           ),
           const SizedBox(height: 16),
           Text(
-            selectedThumbnail == null ? 'Cover image' : 'Cover image ready',
+            selectedThumbnail == null && !_hasRemoteThumbnail
+                ? 'Cover image'
+                : 'Cover image ready',
             style: textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
           Text(
-            selectedThumbnail == null
-                ? 'Select the image that will be uploaded to Firebase Storage when the article is published.'
-                : selectedThumbnail.fileName ??
-                    'The selected image will be uploaded with this article.',
+            selectedThumbnail != null
+                ? selectedThumbnail.fileName ??
+                    'The selected image will be uploaded with this article.'
+                : _hasRemoteThumbnail
+                    ? 'The current remote thumbnail will stay in place unless you select a new image.'
+                    : 'Select the image that will be uploaded to Firebase Storage when the article is published.',
             textAlign: TextAlign.center,
             style: textTheme.bodyMedium,
           ),
@@ -475,6 +503,34 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
           size: 42,
           color: AppPalette.onSurfaceMuted,
         ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnailPreview(CreateArticleState state) {
+    final selectedThumbnail = state.selectedThumbnail;
+    if (selectedThumbnail != null) {
+      return _buildThumbnailPreviewImage(selectedThumbnail.path);
+    }
+
+    final remoteImageUrl = widget.initialArticle?.urlToImage;
+    if (remoteImageUrl != null && remoteImageUrl.isNotEmpty) {
+      return Image.network(
+        remoteImageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildThumbnailPlaceholder(),
+      );
+    }
+
+    return _buildThumbnailPlaceholder();
+  }
+
+  Widget _buildThumbnailPlaceholder() {
+    return const Center(
+      child: Icon(
+        Icons.add_photo_alternate_outlined,
+        size: 52,
+        color: AppPalette.primary,
       ),
     );
   }
@@ -580,12 +636,14 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Publishing...',
+                      _isEditing ? 'Saving changes...' : 'Publishing...',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Finalizing the editorial polish for your story.',
+                      _isEditing
+                          ? 'Applying the latest revision to the live article.'
+                          : 'Finalizing the editorial polish for your story.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
@@ -605,7 +663,9 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
                     _buildPublishingStep(
                       context,
                       icon: Icons.more_horiz_rounded,
-                      label: 'Publishing the article',
+                      label: _isEditing
+                          ? 'Updating the article'
+                          : 'Publishing the article',
                       isActive: true,
                     ),
                     const SizedBox(height: 10),
@@ -685,12 +745,14 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Published successfully',
+                _isEditing ? 'Updated successfully' : 'Published successfully',
                 style: textTheme.headlineSmall,
               ),
               const SizedBox(height: 10),
               Text(
-                'The new article is already available in the feed and ready to be reviewed.',
+                _isEditing
+                    ? 'The latest revision is live and ready to be reviewed.'
+                    : 'The new article is already available in the feed and ready to be reviewed.',
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium,
               ),
@@ -713,7 +775,8 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: _resetEditor,
-                      child: const Text('Create another'),
+                      child:
+                          Text(_isEditing ? 'Keep editing' : 'Create another'),
                     ),
                   ),
                 ],
@@ -775,7 +838,7 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    'Published'.toUpperCase(),
+                    (_isEditing ? 'Updated' : 'Published').toUpperCase(),
                     style: textTheme.labelMedium?.copyWith(
                       color: AppPalette.onSecondaryContainer,
                       letterSpacing: 0.6,
@@ -829,6 +892,9 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
             title: _titleController.text.trim(),
             description: _descriptionController.text.trim(),
             content: _contentController.text.trim(),
+            articleId: widget.initialArticle?.id,
+            sourceUrl: widget.initialArticle?.url,
+            isEditing: _isEditing,
           ),
         );
   }
@@ -966,5 +1032,11 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
         _titleController.text.trim().isEmpty &&
         _descriptionController.text.trim().isEmpty &&
         _contentController.text.trim().isEmpty;
+  }
+
+  bool get _hasRemoteThumbnail {
+    final remoteThumbnailPath =
+        widget.initialThumbnailPath ?? widget.initialArticle?.thumbnailPath;
+    return remoteThumbnailPath != null && remoteThumbnailPath.isNotEmpty;
   }
 }
