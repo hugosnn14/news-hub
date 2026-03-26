@@ -32,5 +32,22 @@ void main() {
 
       await bloc.close();
     });
+
+    test('returns to initial when the editor is reset', () async {
+      final bloc = CreateArticleBloc(
+        CreateArticleUseCase(ArticleRepositoryImpl()),
+      );
+
+      final emittedStatesFuture = bloc.stream.take(1).toList();
+
+      bloc.add(const ResetCreateArticle());
+
+      final emittedStates = await emittedStatesFuture;
+
+      expect(emittedStates[0].status, CreateArticleStatus.initial);
+      expect(emittedStates[0].article, isNull);
+
+      await bloc.close();
+    });
   });
 }

@@ -9,7 +9,7 @@ import '../../features/daily_news/presentation/bloc/create_article/create_articl
 import '../../features/daily_news/presentation/bloc/saved_articles/saved_articles_bloc.dart';
 import '../../features/daily_news/presentation/bloc/saved_articles/saved_articles_event.dart';
 import '../../features/daily_news/presentation/pages/article_detail/article_detail.dart';
-import '../../features/daily_news/presentation/pages/create_article/create_article.dart';
+import '../../features/daily_news/presentation/pages/create_article/create_article_editor.dart';
 import '../../features/daily_news/presentation/pages/home/daily_news.dart';
 import '../../features/daily_news/presentation/pages/saved_article/saved_article.dart';
 
@@ -48,7 +48,7 @@ class AppRoutes {
         return _materialRoute(
           BlocProvider<CreateArticleBloc>(
             create: (_) => sl<CreateArticleBloc>(),
-            child: const CreateArticlePage(),
+            child: const CreateArticleEditorPage(),
           ),
           settings,
         );
