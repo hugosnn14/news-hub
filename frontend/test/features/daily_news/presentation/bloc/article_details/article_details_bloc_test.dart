@@ -4,6 +4,7 @@ import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article_details/article_details_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article_details/article_details_event.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article_details/article_details_state.dart';
+import '../../../../../helpers/fake_article_repository.dart';
 
 void main() {
   group('ArticleDetailsBloc', () {
@@ -43,6 +44,29 @@ void main() {
       expect(emittedStates[0].status, ArticleDetailsStatus.loading);
       expect(emittedStates[1].status, ArticleDetailsStatus.notFound);
       expect(emittedStates[1].article, isNull);
+
+      await bloc.close();
+    });
+
+    test('emits loading and failure when the repository throws', () async {
+      final bloc = ArticleDetailsBloc(
+        GetArticleByIdUseCase(
+          FakeArticleRepository(shouldThrowOnGetArticleById: true),
+        ),
+      );
+
+      final emittedStatesFuture = bloc.stream.take(2).toList();
+
+      bloc.add(const LoadArticleDetails(2));
+
+      final emittedStates = await emittedStatesFuture;
+
+      expect(emittedStates[0].status, ArticleDetailsStatus.loading);
+      expect(emittedStates[1].status, ArticleDetailsStatus.failure);
+      expect(
+        emittedStates[1].errorMessage,
+        'No se pudo cargar el articulo.',
+      );
 
       await bloc.close();
     });

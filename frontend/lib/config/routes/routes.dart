@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../injection_container.dart';
-import '../../features/daily_news/domain/entities/article.dart';
 import '../../features/daily_news/presentation/bloc/article_details/article_details_bloc.dart';
 import '../../features/daily_news/presentation/bloc/article_details/article_details_event.dart';
 import '../../features/daily_news/presentation/bloc/create_article/create_article_bloc.dart';
@@ -20,12 +19,14 @@ class AppRoutes {
   static const String savedArticles = '/saved-articles';
 
   static Route onGenerateRoutes(RouteSettings settings) {
+    // Active navigation only exposes the current Bloc-based presentation flow.
+    // Legacy screens remain in the repository, but are intentionally not wired
+    // through this route table anymore.
     switch (settings.name) {
       case home:
         return _materialRoute(const DailyNews(), settings);
 
       case articleDetails:
-      case '/ArticleDetails':
         return _materialRoute(
           MultiBlocProvider(
             providers: [
@@ -44,7 +45,6 @@ class AppRoutes {
           settings,
         );
       case createArticle:
-      case '/CreateArticle':
         return _materialRoute(
           BlocProvider<CreateArticleBloc>(
             create: (_) => sl<CreateArticleBloc>(),
@@ -71,12 +71,8 @@ class AppRoutes {
       return arguments;
     }
 
-    if (arguments is ArticleEntity && arguments.id != null) {
-      return arguments.id!;
-    }
-
     throw ArgumentError(
-      'Article details route requires an articleId or an ArticleEntity with a non-null id.',
+      'Article details route requires a non-null articleId.',
     );
   }
 }

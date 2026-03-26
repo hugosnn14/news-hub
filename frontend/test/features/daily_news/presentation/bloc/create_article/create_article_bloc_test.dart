@@ -4,6 +4,7 @@ import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/create_article/create_article_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/create_article/create_article_event.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/create_article/create_article_state.dart';
+import '../../../../../helpers/fake_article_repository.dart';
 
 void main() {
   group('CreateArticleBloc', () {
@@ -46,6 +47,36 @@ void main() {
 
       expect(emittedStates[0].status, CreateArticleStatus.initial);
       expect(emittedStates[0].article, isNull);
+
+      await bloc.close();
+    });
+
+    test('emits submitting and failure when article creation throws', () async {
+      final bloc = CreateArticleBloc(
+        CreateArticleUseCase(
+          FakeArticleRepository(shouldThrowOnCreateArticle: true),
+        ),
+      );
+
+      final emittedStatesFuture = bloc.stream.take(2).toList();
+
+      bloc.add(
+        const SubmitCreateArticle(
+          authorName: 'Hugo',
+          title: 'Broken flow',
+          description: 'The repository throws during creation.',
+          content: 'The bloc should surface a failure state.',
+        ),
+      );
+
+      final emittedStates = await emittedStatesFuture;
+
+      expect(emittedStates[0].status, CreateArticleStatus.submitting);
+      expect(emittedStates[1].status, CreateArticleStatus.failure);
+      expect(
+        emittedStates[1].errorMessage,
+        'No se pudo crear el articulo.',
+      );
 
       await bloc.close();
     });

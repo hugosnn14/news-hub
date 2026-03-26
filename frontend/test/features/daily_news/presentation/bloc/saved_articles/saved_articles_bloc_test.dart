@@ -7,6 +7,7 @@ import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/saved_articles/saved_articles_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/saved_articles/saved_articles_event.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/saved_articles/saved_articles_state.dart';
+import '../../../../../helpers/fake_article_repository.dart';
 
 void main() {
   group('SavedArticlesBloc', () {
@@ -75,6 +76,33 @@ void main() {
       expect(emittedStates[0].status, SavedArticlesStatus.loading);
       expect(emittedStates[1].status, SavedArticlesStatus.success);
       expect(emittedStates[1].articles, isEmpty);
+
+      await bloc.close();
+    });
+
+    test('emits loading and failure when saved articles cannot be loaded',
+        () async {
+      final repository = FakeArticleRepository(
+        shouldThrowOnGetSavedArticles: true,
+      );
+      final bloc = SavedArticlesBloc(
+        GetSavedArticleUseCase(repository),
+        SaveArticleUseCase(repository),
+        RemoveArticleUseCase(repository),
+      );
+
+      final emittedStatesFuture = bloc.stream.take(2).toList();
+
+      bloc.add(const SavedArticlesRequested());
+
+      final emittedStates = await emittedStatesFuture;
+
+      expect(emittedStates[0].status, SavedArticlesStatus.loading);
+      expect(emittedStates[1].status, SavedArticlesStatus.failure);
+      expect(
+        emittedStates[1].errorMessage,
+        'No se pudieron cargar los articulos guardados.',
+      );
 
       await bloc.close();
     });

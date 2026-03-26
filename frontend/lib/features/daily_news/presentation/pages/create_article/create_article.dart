@@ -6,6 +6,8 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/articles_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/articles_event.dart';
 
+// Legacy draft screen retained for reference while the active route points to
+// CreateArticleEditorPage.
 class CreateArticlePage extends StatefulWidget {
   const CreateArticlePage({super.key});
 
