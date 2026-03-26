@@ -1,3 +1,4 @@
+import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 
 abstract class ArticleRepository {
@@ -6,4 +7,13 @@ abstract class ArticleRepository {
   Future<ArticleEntity?> getArticleById(int articleId);
 
   Future<ArticleEntity> createArticle(ArticleEntity article);
+
+  // Legacy API kept so previous files remain available in the tree.
+  Future<DataState<List<ArticleEntity>>> getNewsArticles();
+
+  Future<List<ArticleEntity>> getSavedArticles();
+
+  Future<void> saveArticle(ArticleEntity article);
+
+  Future<void> removeArticle(ArticleEntity article);
 }

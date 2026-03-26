@@ -1,3 +1,4 @@
+import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
 
@@ -42,6 +43,7 @@ class ArticleRepositoryImpl implements ArticleRepository {
           'Small scopes reduce uncertainty, make testing easier, and help teams prove reliability with less noise.',
     ),
   ];
+  final List<ArticleEntity> _savedArticles = [];
 
   int _nextId = 4;
 
@@ -76,5 +78,28 @@ class ArticleRepositoryImpl implements ArticleRepository {
     _articles.insert(0, createdArticle);
 
     return createdArticle;
+  }
+
+  @override
+  Future<DataState<List<ArticleEntity>>> getNewsArticles() async {
+    return DataSuccess(List.unmodifiable(_articles));
+  }
+
+  @override
+  Future<List<ArticleEntity>> getSavedArticles() async {
+    return List.unmodifiable(_savedArticles);
+  }
+
+  @override
+  Future<void> saveArticle(ArticleEntity article) async {
+    final alreadySaved = _savedArticles.any((item) => item.id == article.id);
+    if (!alreadySaved) {
+      _savedArticles.add(article);
+    }
+  }
+
+  @override
+  Future<void> removeArticle(ArticleEntity article) async {
+    _savedArticles.removeWhere((item) => item.id == article.id);
   }
 }
