@@ -120,11 +120,13 @@ class CreateArticleBloc extends Bloc<CreateArticleEvent, CreateArticleState> {
           clearErrorMessage: true,
         ),
       );
-    } catch (_) {
+    } catch (error) {
       emit(
         state.copyWith(
           status: CreateArticleStatus.failure,
-          errorMessage: 'No se pudo crear el articulo.',
+          errorMessage: error is StateError
+              ? error.message.toString()
+              : 'No se pudo crear el articulo.',
         ),
       );
     }

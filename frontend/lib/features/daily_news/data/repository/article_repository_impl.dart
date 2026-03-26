@@ -58,7 +58,7 @@ class ArticleRepositoryImpl implements ArticleRepository {
     required ArticleThumbnailEntity thumbnail,
   }) async {
     final articleId = _firestoreRemoteDataSource.createArticleId();
-    final authorId = _authRemoteDataSource.getCurrentUserId();
+    final authorId = await _authRemoteDataSource.getCurrentUserId();
     final thumbnailPath = _buildThumbnailPath(articleId, thumbnail);
 
     await _firestoreRemoteDataSource.createArticle(

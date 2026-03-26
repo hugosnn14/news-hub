@@ -8,10 +8,10 @@ Future<void> bootstrapFirebaseForAndroidApp() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await _ensureAnonymousSession(FirebaseAuth.instance);
+  await _warmAnonymousSessionIfAvailable(FirebaseAuth.instance);
 }
 
-Future<void> _ensureAnonymousSession(FirebaseAuth auth) async {
+Future<void> _warmAnonymousSessionIfAvailable(FirebaseAuth auth) async {
   if (auth.currentUser != null) {
     return;
   }
@@ -19,12 +19,15 @@ Future<void> _ensureAnonymousSession(FirebaseAuth auth) async {
   try {
     await auth.signInAnonymously();
   } on FirebaseAuthException catch (error) {
-    if (error.code == 'operation-not-allowed') {
-      throw StateError(
-        'Firebase Anonymous Auth must be enabled for the Android bootstrap.',
-      );
+    if (_isAnonymousAuthUnavailable(error)) {
+      return;
     }
 
     rethrow;
   }
+}
+
+bool _isAnonymousAuthUnavailable(FirebaseAuthException error) {
+  return error.code == 'operation-not-allowed' ||
+      error.code == 'admin-restricted-operation';
 }
