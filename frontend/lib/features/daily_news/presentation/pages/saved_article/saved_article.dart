@@ -18,9 +18,11 @@ class SavedArticles extends StatelessWidget {
     return BlocProvider(
       create: (_) =>
           sl<SavedArticlesBloc>()..add(const SavedArticlesRequested()),
-      child: Scaffold(
-        appBar: _buildAppBar(context),
-        body: _buildBody(context),
+      child: Builder(
+        builder: (context) => Scaffold(
+          appBar: _buildAppBar(context),
+          body: _buildBody(context),
+        ),
       ),
     );
   }

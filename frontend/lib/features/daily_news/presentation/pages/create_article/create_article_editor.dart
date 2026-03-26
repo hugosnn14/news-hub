@@ -413,11 +413,23 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
   }
 
   Widget _buildToolbarCard(BuildContext context) {
-    const toolbarIcons = [
-      Icons.format_bold_rounded,
-      Icons.format_italic_rounded,
-      Icons.link_rounded,
-      Icons.format_quote_rounded,
+    const toolbarActions = [
+      _FormattingAction(
+        icon: Icons.format_bold_rounded,
+        label: 'Bold',
+      ),
+      _FormattingAction(
+        icon: Icons.format_italic_rounded,
+        label: 'Italic',
+      ),
+      _FormattingAction(
+        icon: Icons.link_rounded,
+        label: 'Link',
+      ),
+      _FormattingAction(
+        icon: Icons.format_quote_rounded,
+        label: 'Quote',
+      ),
     ];
 
     return Container(
@@ -434,31 +446,68 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Formatting',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const Spacer(),
-          ...toolbarIcons.map(
-            (icon) => Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: AppPalette.surfaceContainer,
-                  borderRadius: BorderRadius.circular(14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Formatting',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: AppPalette.onSurfaceMuted,
+                const SizedBox(height: 6),
+                Text(
+                  'Rich text actions are mocked in this phase. Tap a control to see the planned behavior.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppPalette.onSurfaceMuted,
+                      ),
                 ),
-              ),
+              ],
             ),
           ),
+          const SizedBox(width: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.end,
+            children: toolbarActions
+                .map(
+                  (action) => Tooltip(
+                    message: '${action.label} formatting (mock)',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () =>
+                          _showFormattingMessage(context, action.label),
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: AppPalette.surfaceContainer,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          action.icon,
+                          size: 20,
+                          color: AppPalette.onSurfaceMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
         ],
+      ),
+    );
+  }
+
+  void _showFormattingMessage(BuildContext context, String actionLabel) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '$actionLabel formatting is a UI stub in this mocked phase.',
+        ),
       ),
     );
   }
@@ -788,4 +837,14 @@ class _CreateArticleEditorPageState extends State<CreateArticleEditorPage> {
       arguments: articleId,
     );
   }
+}
+
+class _FormattingAction {
+  final IconData icon;
+  final String label;
+
+  const _FormattingAction({
+    required this.icon,
+    required this.label,
+  });
 }

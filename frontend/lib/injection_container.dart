@@ -2,7 +2,6 @@ import 'package:get_it/get_it.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/repository/article_repository_impl.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/create_article.dart';
-import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_article_by_id.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_articles.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_saved_article.dart';
@@ -19,7 +18,6 @@ Future<void> initializeDependencies() async {
   sl.registerSingleton<ArticleRepository>(ArticleRepositoryImpl());
 
   sl.registerSingleton<CreateArticleUseCase>(CreateArticleUseCase(sl()));
-  sl.registerSingleton<GetArticleUseCase>(GetArticleUseCase(sl()));
   sl.registerSingleton<GetArticlesUseCase>(GetArticlesUseCase(sl()));
   sl.registerSingleton<GetArticleByIdUseCase>(GetArticleByIdUseCase(sl()));
   sl.registerSingleton<GetSavedArticleUseCase>(GetSavedArticleUseCase(sl()));

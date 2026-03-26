@@ -175,6 +175,12 @@ class ArticleDetailsView extends StatelessWidget {
   }
 
   Widget _buildArticleImage(ArticleEntity article) {
+    final imageUrl = article.urlToImage?.trim();
+
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return _buildImageFallback();
+    }
+
     return Container(
       width: double.maxFinite,
       height: 250,
@@ -182,10 +188,37 @@ class ArticleDetailsView extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: Image.network(
-          article.urlToImage ?? '',
+          imageUrl,
           fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) {
+              return child;
+            }
+
+            return _buildImageFallback(
+              child: const SizedBox(
+                width: 28,
+                height: 28,
+                child: CircularProgressIndicator(strokeWidth: 2.4),
+              ),
+            );
+          },
+          errorBuilder: (_, __, ___) => _buildImageFallback(),
         ),
       ),
+    );
+  }
+
+  Widget _buildImageFallback({Widget? child}) {
+    return Container(
+      color: AppPalette.surfaceContainer,
+      alignment: Alignment.center,
+      child: child ??
+          const Icon(
+            Icons.image_outlined,
+            size: 42,
+            color: AppPalette.onSurfaceMuted,
+          ),
     );
   }
 
